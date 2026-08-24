@@ -1,25 +1,33 @@
 package com.rana.ludo
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.rana.ludo.model.AiDifficulty
 import com.rana.ludo.model.GameMode
+import com.rana.ludo.ui.LudoColors
 
 @Composable
 fun GameSetupScreen(
@@ -37,128 +45,98 @@ fun GameSetupScreen(
 
     Column(
         modifier = Modifier
-            .padding(20.dp),
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        LudoColors.BackgroundDark,
+                        LudoColors.Background,
+                        LudoColors.BackgroundDark
+                    )
+                )
+            )
+            .padding(
+                horizontal = 18.dp,
+                vertical = 16.dp
+            ),
 
         horizontalAlignment =
             Alignment.CenterHorizontally
     ) {
 
-        Text(
-            text = "🎲 Game Setup",
-            style =
-                MaterialTheme.typography
-                    .headlineMedium,
-
-            fontWeight =
-                FontWeight.Bold
-        )
-
-        Spacer(
-            modifier = Modifier.height(24.dp)
-        )
-
         /*
-         * -----------------------------------------
-         * PLAYER COUNT
-         * -----------------------------------------
+         * HEADER
          */
-
-        Text(
-            text = "Number of Players",
-            style =
-                MaterialTheme.typography
-                    .titleMedium,
-
-            fontWeight =
-                FontWeight.Bold
-        )
-
-        Spacer(
-            modifier = Modifier.height(10.dp)
-        )
 
         Row(
             modifier =
                 Modifier.fillMaxWidth(),
 
-            horizontalArrangement =
-                Arrangement.spacedBy(8.dp)
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
 
-            PlayerButton(
-                text = "2",
-                selected =
-                    selectedPlayers == 2,
-
-                onClick = {
-                    onPlayersSelected(2)
-                },
-
+            Button(
+                onClick = onBack,
                 modifier =
-                    Modifier.weight(1f)
+                    Modifier.size(48.dp),
+
+                shape =
+                    RoundedCornerShape(16.dp),
+
+                contentPadding =
+                    androidx.compose.foundation.layout
+                        .PaddingValues(0.dp),
+
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor =
+                            LudoColors.Panel
+                    )
+            ) {
+
+                Text(
+                    text = "←",
+                    fontSize = 25.sp
+                )
+            }
+
+            Text(
+                text = "LUDO",
+                modifier =
+                    Modifier.weight(1f),
+
+                textAlign =
+                    androidx.compose.ui.text.style
+                        .TextAlign.Center,
+
+                fontSize = 28.sp,
+
+                fontWeight =
+                    FontWeight.Black,
+
+                color =
+                    LudoColors.Gold
             )
 
-            PlayerButton(
-                text = "3",
-                selected =
-                    selectedPlayers == 3,
-
-                onClick = {
-                    onPlayersSelected(3)
-                },
-
+            Box(
                 modifier =
-                    Modifier.weight(1f)
-            )
-
-            PlayerButton(
-                text = "4",
-                selected =
-                    selectedPlayers == 4,
-
-                onClick = {
-                    onPlayersSelected(4)
-                },
-
-                modifier =
-                    Modifier.weight(1f)
+                    Modifier.size(48.dp)
             )
         }
 
         Spacer(
-            modifier = Modifier.height(8.dp)
+            modifier =
+                Modifier.height(20.dp)
         )
 
-        Text(
-            text =
-                "$selectedPlayers Players",
-            style =
-                MaterialTheme.typography
-                    .bodyMedium
+        SectionTitle(
+            text = "SELECT MODE"
         )
 
         Spacer(
-            modifier = Modifier.height(24.dp)
-        )
-
-        /*
-         * -----------------------------------------
-         * GAME MODE
-         * -----------------------------------------
-         */
-
-        Text(
-            text = "Game Mode",
-            style =
-                MaterialTheme.typography
-                    .titleMedium,
-
-            fontWeight =
-                FontWeight.Bold
-        )
-
-        Spacer(
-            modifier = Modifier.height(10.dp)
+            modifier =
+                Modifier.height(12.dp)
         )
 
         Row(
@@ -166,27 +144,16 @@ fun GameSetupScreen(
                 Modifier.fillMaxWidth(),
 
             horizontalArrangement =
-                Arrangement.spacedBy(8.dp)
+                Arrangement.spacedBy(12.dp)
         ) {
 
-            ModeButton(
-                text = "👥 Local",
-                selected =
-                    selectedMode ==
-                            GameMode.LOCAL,
-
-                onClick = {
-                    onModeSelected(
-                        GameMode.LOCAL
-                    )
-                },
-
+            ModeCard(
                 modifier =
-                    Modifier.weight(1f)
-            )
+                    Modifier.weight(1f),
 
-            ModeButton(
-                text = "🤖 Computer",
+                title = "VS COMPUTER",
+                icon = "🤖",
+
                 selected =
                     selectedMode ==
                             GameMode.VS_COMPUTER,
@@ -195,18 +162,68 @@ fun GameSetupScreen(
                     onModeSelected(
                         GameMode.VS_COMPUTER
                     )
-                },
+                }
+            )
 
+            ModeCard(
                 modifier =
-                    Modifier.weight(1f)
+                    Modifier.weight(1f),
+
+                title = "LOCAL PLAYER",
+                icon = "👥",
+
+                selected =
+                    selectedMode ==
+                            GameMode.LOCAL,
+
+                onClick = {
+                    onModeSelected(
+                        GameMode.LOCAL
+                    )
+                }
             )
         }
 
-        /*
-         * -----------------------------------------
-         * AI DIFFICULTY
-         * -----------------------------------------
-         */
+        Spacer(
+            modifier =
+                Modifier.height(22.dp)
+        )
+
+        SectionTitle(
+            text = "SELECT PLAYERS"
+        )
+
+        Spacer(
+            modifier =
+                Modifier.height(12.dp)
+        )
+
+        Row(
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            horizontalArrangement =
+                Arrangement.spacedBy(10.dp)
+        ) {
+
+            listOf(2, 3, 4).forEach { count ->
+
+                SelectionBox(
+                    modifier =
+                        Modifier.weight(1f),
+
+                    text =
+                        count.toString(),
+
+                    selected =
+                        selectedPlayers == count,
+
+                    onClick = {
+                        onPlayersSelected(count)
+                    }
+                )
+            }
+        }
 
         if (
             selectedMode ==
@@ -215,17 +232,11 @@ fun GameSetupScreen(
 
             Spacer(
                 modifier =
-                    Modifier.height(24.dp)
+                    Modifier.height(20.dp)
             )
 
-            Text(
-                text = "AI Difficulty",
-                style =
-                    MaterialTheme.typography
-                        .titleMedium,
-
-                fontWeight =
-                    FontWeight.Bold
+            SectionTitle(
+                text = "AI DIFFICULTY"
             )
 
             Spacer(
@@ -238,273 +249,313 @@ fun GameSetupScreen(
                     Modifier.fillMaxWidth(),
 
                 horizontalArrangement =
-                    Arrangement.spacedBy(6.dp)
+                    Arrangement.spacedBy(8.dp)
             ) {
 
-                DifficultyButton(
-                    text = "Easy",
-                    selected =
-                        selectedDifficulty ==
-                                AiDifficulty.EASY,
+                AiDifficulty.values()
+                    .forEach { difficulty ->
 
-                    onClick = {
-                        onDifficultySelected(
-                            AiDifficulty.EASY
+                        SelectionBox(
+                            modifier =
+                                Modifier.weight(1f),
+
+                            text =
+                                difficulty.name
+                                    .lowercase()
+                                    .replaceFirstChar {
+                                        it.uppercase()
+                                    },
+
+                            selected =
+                                selectedDifficulty ==
+                                        difficulty,
+
+                            onClick = {
+                                onDifficultySelected(
+                                    difficulty
+                                )
+                            }
                         )
-                    },
-
-                    modifier =
-                        Modifier.weight(1f)
-                )
-
-                DifficultyButton(
-                    text = "Medium",
-                    selected =
-                        selectedDifficulty ==
-                                AiDifficulty.MEDIUM,
-
-                    onClick = {
-                        onDifficultySelected(
-                            AiDifficulty.MEDIUM
-                        )
-                    },
-
-                    modifier =
-                        Modifier.weight(1f)
-                )
-
-                DifficultyButton(
-                    text = "Hard",
-                    selected =
-                        selectedDifficulty ==
-                                AiDifficulty.HARD,
-
-                    onClick = {
-                        onDifficultySelected(
-                            AiDifficulty.HARD
-                        )
-                    },
-
-                    modifier =
-                        Modifier.weight(1f)
-                )
+                    }
             }
         }
 
         Spacer(
             modifier =
-                Modifier.height(28.dp)
+                Modifier.height(24.dp)
         )
 
-        /*
-         * -----------------------------------------
-         * SUMMARY
-         * -----------------------------------------
-         */
+        SectionTitle(
+            text = "SELECT PAWN"
+        )
 
-        Card(
+        Spacer(
             modifier =
-                Modifier.fillMaxWidth()
+                Modifier.height(12.dp)
+        )
+
+        Row(
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            horizontalArrangement =
+                Arrangement.SpaceEvenly
         ) {
 
-            Column(
-                modifier =
-                    Modifier.padding(16.dp)
-            ) {
+            PawnPreview(
+                color = LudoColors.Red,
+                emoji = "🔴"
+            )
 
-                Text(
-                    text = "Game Summary",
-                    fontWeight =
-                        FontWeight.Bold
-                )
+            PawnPreview(
+                color = LudoColors.Green,
+                emoji = "🟢"
+            )
 
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
-                )
+            PawnPreview(
+                color = LudoColors.Yellow,
+                emoji = "🟡"
+            )
 
-                Text(
-                    text =
-                        "Players: $selectedPlayers"
-                )
-
-                Text(
-                    text =
-                        when (selectedMode) {
-
-                            GameMode.LOCAL ->
-                                "Mode: Local Multiplayer"
-
-                            GameMode.VS_COMPUTER ->
-                                "Mode: vs Computer"
-                        }
-                )
-
-                if (
-                    selectedMode ==
-                    GameMode.VS_COMPUTER
-                ) {
-
-                    Text(
-                        text =
-                            "Difficulty: ${
-                                selectedDifficulty.name
-                            }"
-                    )
-                }
-            }
+            PawnPreview(
+                color = LudoColors.Blue,
+                emoji = "🔵"
+            )
         }
 
         Spacer(
             modifier =
-                Modifier.height(20.dp)
+                Modifier.weight(1f)
         )
-
-        /*
-         * -----------------------------------------
-         * START GAME
-         * -----------------------------------------
-         */
 
         Button(
             onClick = onStartGame,
-            modifier =
-                Modifier.fillMaxWidth()
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp),
+
+            shape =
+                RoundedCornerShape(20.dp),
+
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor =
+                        LudoColors.Green
+                )
         ) {
 
             Text(
-                text = "🎮 Start Game"
+                text = "🎮  PLAY",
+                fontSize = 23.sp,
+                fontWeight =
+                    FontWeight.Black
             )
         }
 
         Spacer(
             modifier =
-                Modifier.height(8.dp)
+                Modifier.height(12.dp)
         )
+    }
+}
 
-        OutlinedButton(
-            onClick = onBack,
-            modifier =
-                Modifier.fillMaxWidth()
+@Composable
+private fun SectionTitle(
+    text: String
+) {
+
+    Text(
+        text = text,
+
+        fontSize = 18.sp,
+
+        fontWeight =
+            FontWeight.Black,
+
+        color =
+            LudoColors.Gold
+    )
+}
+
+@Composable
+private fun ModeCard(
+    modifier: Modifier,
+    title: String,
+    icon: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+
+    Button(
+        onClick = onClick,
+
+        modifier = modifier
+            .height(145.dp)
+            .shadow(
+                if (selected) 10.dp else 4.dp,
+                RoundedCornerShape(20.dp)
+            )
+            .border(
+                width =
+                    if (selected) 3.dp else 1.dp,
+
+                color =
+                    if (selected)
+                        LudoColors.Gold
+                    else
+                        LudoColors.GoldDark,
+
+                shape =
+                    RoundedCornerShape(20.dp)
+            ),
+
+        shape =
+            RoundedCornerShape(20.dp),
+
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor =
+                    if (selected)
+                        LudoColors.PanelLight
+                    else
+                        LudoColors.Panel
+            )
+    ) {
+
+        Column(
+            horizontalAlignment =
+                Alignment.CenterHorizontally,
+
+            verticalArrangement =
+                Arrangement.Center
         ) {
 
             Text(
-                text = "← Back"
+                text = icon,
+                fontSize = 48.sp
             )
+
+            Spacer(
+                modifier =
+                    Modifier.height(8.dp)
+            )
+
+            Text(
+                text = title,
+                fontSize = 13.sp,
+                fontWeight =
+                    FontWeight.Black,
+                color =
+                    LudoColors.TextPrimary
+            )
+
+            if (selected) {
+
+                Text(
+                    text = "✓",
+                    color =
+                        LudoColors.Gold,
+                    fontSize = 20.sp,
+                    fontWeight =
+                        FontWeight.Black
+                )
+            }
         }
     }
 }
 
-/* ------------------------------------------------ */
-/* PLAYER BUTTON                                   */
-/* ------------------------------------------------ */
-
 @Composable
-private fun PlayerButton(
+private fun SelectionBox(
+    modifier: Modifier,
     text: String,
     selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit
 ) {
 
-    if (selected) {
+    Button(
+        onClick = onClick,
 
-        Button(
-            onClick = onClick,
-            modifier = modifier
-        ) {
+        modifier = modifier
+            .height(64.dp)
+            .border(
+                width =
+                    if (selected) 3.dp else 1.dp,
 
-            Text(
-                text = text
+                color =
+                    if (selected)
+                        LudoColors.Gold
+                    else
+                        LudoColors.GoldDark,
+
+                shape =
+                    RoundedCornerShape(16.dp)
+            ),
+
+        shape =
+            RoundedCornerShape(16.dp),
+
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor =
+                    if (selected)
+                        LudoColors.Red
+                    else
+                        LudoColors.Panel
             )
-        }
+    ) {
 
-    } else {
+        Text(
+            text = text,
 
-        OutlinedButton(
-            onClick = onClick,
-            modifier = modifier
-        ) {
+            fontSize =
+                if (text.length > 5)
+                    13.sp
+                else
+                    25.sp,
 
-            Text(
-                text = text
-            )
-        }
+            fontWeight =
+                FontWeight.Black,
+
+            color =
+                LudoColors.TextPrimary
+        )
     }
 }
 
-/* ------------------------------------------------ */
-/* MODE BUTTON                                     */
-/* ------------------------------------------------ */
-
 @Composable
-private fun ModeButton(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun PawnPreview(
+    color: Color,
+    emoji: String
 ) {
 
-    if (selected) {
-
-        Button(
-            onClick = onClick,
-            modifier = modifier
-        ) {
-
-            Text(
-                text = text
+    Box(
+        modifier = Modifier
+            .size(70.dp)
+            .shadow(
+                6.dp,
+                RoundedCornerShape(16.dp)
             )
-        }
-
-    } else {
-
-        OutlinedButton(
-            onClick = onClick,
-            modifier = modifier
-        ) {
-
-            Text(
-                text = text
+            .background(
+                color = color.copy(
+                    alpha = 0.25f
+                ),
+                shape =
+                    RoundedCornerShape(16.dp)
             )
-        }
-    }
-}
+            .border(
+                2.dp,
+                color,
+                RoundedCornerShape(16.dp)
+            ),
 
-/* ------------------------------------------------ */
-/* DIFFICULTY BUTTON                               */
-/* ------------------------------------------------ */
+        contentAlignment =
+            Alignment.Center
+    ) {
 
-@Composable
-private fun DifficultyButton(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-
-    if (selected) {
-
-        Button(
-            onClick = onClick,
-            modifier = modifier
-        ) {
-
-            Text(
-                text = text
-            )
-        }
-
-    } else {
-
-        OutlinedButton(
-            onClick = onClick,
-            modifier = modifier
-        ) {
-
-            Text(
-                text = text
-            )
-        }
+        Text(
+            text = emoji,
+            fontSize = 38.sp
+        )
     }
 }
