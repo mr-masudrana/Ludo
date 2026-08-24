@@ -16,4 +16,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Ludo"
+
 include(":app")
