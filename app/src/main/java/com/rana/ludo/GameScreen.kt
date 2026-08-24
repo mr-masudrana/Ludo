@@ -29,7 +29,6 @@ import com.rana.ludo.model.AiDifficulty
 import com.rana.ludo.model.GameFactory
 import com.rana.ludo.model.GameMode
 import com.rana.ludo.model.Player
-import com.rana.ludo.model.PlayerColor
 import com.rana.ludo.model.Token
 import com.rana.ludo.ui.DiceView
 import com.rana.ludo.ui.WinnerDialog
@@ -44,15 +43,10 @@ fun GameScreen(
     onBack: () -> Unit
 ) {
 
-    /*
-     * GameEngine শুধুমাত্র game শুরু হওয়ার সময়
-     * তৈরি হবে।
-     */
     val gameEngine = remember(
         playerCount,
         gameMode
     ) {
-
         GameEngine(
             GameFactory.createGame(
                 playerCount = playerCount,
@@ -61,16 +55,10 @@ fun GameScreen(
         )
     }
 
-    /*
-     * UI refresh trigger
-     */
     var refresh by remember {
         mutableIntStateOf(0)
     }
 
-    /*
-     * Dice
-     */
     var diceValue by remember {
         mutableIntStateOf(0)
     }
@@ -79,95 +67,64 @@ fun GameScreen(
         mutableStateOf(false)
     }
 
-    /*
-     * Token animation
-     */
-    var isAnimating by remember {
-        mutableStateOf(false)
-    }
-
-    /*
-     * Message
-     */
     var message by remember {
         mutableStateOf(
             "Roll the dice to start."
         )
     }
 
-    /*
-     * Current player
-     */
     val currentPlayer =
         gameEngine.currentPlayer()
 
-    val currentPlayerIndex =
-        gameEngine
-            .state
-            .currentPlayerIndex
+    val winner =
+        gameEngine.state.winner
+
+    val computerTurn =
+        gameMode == GameMode.VS_COMPUTER &&
+                currentPlayer.isComputer
 
     /*
-     * Movable tokens
+     * Current player's movable tokens
      */
     val movableTokenIds =
         if (
-            !isAnimating &&
+            !isRolling &&
             gameEngine.hasRolledDice()
         ) {
-
             gameEngine
                 .getMovableTokenIds()
-
         } else {
-
             emptySet()
         }
 
     /*
-     * Winner
-     */
-    val winner =
-        gameEngine.state.winner
-
-    /*
-     * Computer turn?
-     */
-    val computerTurn =
-        gameMode ==
-                GameMode.VS_COMPUTER &&
-                currentPlayer.isComputer
-
-    /*
-     * ------------------------------------------------
+     * ------------------------------------------
      * COMPUTER TURN
-     * ------------------------------------------------
+     * ------------------------------------------
      */
 
     LaunchedEffect(
-        currentPlayerIndex,
-        gameMode,
-        winner,
-        isAnimating
+        gameEngine.state.currentPlayerIndex,
+        gameEngine.state.diceValue,
+        winner
     ) {
 
         if (
             computerTurn &&
-            winner == null &&
-            !isAnimating
+            winner == null
         ) {
 
             /*
-             * একটু delay,
-             * যেন AI হঠাৎ action না করে।
+             * Small thinking delay
              */
             delay(700)
 
             /*
-             * Dice animation শুরু
+             * Roll
              */
             isRolling = true
 
-            delay(450)
+            delay(400)
 
             val diceResult =
                 gameEngine.rollDiceResult()
@@ -180,14 +137,14 @@ fun GameScreen(
             refresh++
 
             /*
-             * Three consecutive six
+             * Three six
              */
             if (
                 diceResult.thirdSix
             ) {
 
                 message =
-                    "🤖 Computer rolled three 6s."
+                    "🤖 Computer rolled three 6s!"
 
                 delay(800)
 
@@ -203,10 +160,8 @@ fun GameScreen(
                 return@LaunchedEffect
             }
 
-            delay(500)
-
             /*
-             * কোনো valid token নেই
+             * No move
              */
             if (
                 !gameEngine.hasMovableToken()
@@ -215,7 +170,7 @@ fun GameScreen(
                 message =
                     "🤖 No valid move."
 
-                delay(700)
+                delay(800)
 
                 gameEngine
                     .finishTurnIfNoMove()
@@ -230,8 +185,10 @@ fun GameScreen(
                 return@LaunchedEffect
             }
 
+            delay(400)
+
             /*
-             * AI token নির্বাচন
+             * AI chooses token
              */
             val token =
                 ComputerPlayer.chooseToken(
@@ -254,24 +211,10 @@ fun GameScreen(
             message =
                 "🤖 Computer is moving..."
 
-            delay(400)
+            delay(500)
 
             /*
-             * Token movement animation
-             */
-            animateTokenMove(
-                engine = gameEngine,
-                token = token,
-                onStart = {
-                    isAnimating = true
-                },
-                onEnd = {
-                    isAnimating = false
-                }
-            )
-
-            /*
-             * আসল movement
+             * Actual move
              */
             val result =
                 gameEngine.moveToken(
@@ -285,36 +228,30 @@ fun GameScreen(
                 gameEngine.state.diceValue
 
             refresh++
-
-            /*
-             * Extra turn হলে আবার AI turn হবে।
-             *
-             * সাধারণ move হলে GameEngine
-             * next player করে দিয়েছে।
-             */
         }
     }
 
     /*
-     * ------------------------------------------------
+     * ------------------------------------------
      * UI
-     * ------------------------------------------------
+     * ------------------------------------------
      */
 
     Column(
         modifier = Modifier
             .padding(12.dp),
+
         horizontalAlignment =
             Alignment.CenterHorizontally
     ) {
 
-        /*
-         * Header
-         */
         Text(
             text = "🎲 Offline Ludo",
+
             style =
-                MaterialTheme.typography.headlineMedium,
+                MaterialTheme.typography
+                    .headlineMedium,
+
             fontWeight =
                 FontWeight.Bold
         )
@@ -333,10 +270,7 @@ fun GameScreen(
 
                     GameMode.VS_COMPUTER ->
                         "🤖 vs Computer"
-                },
-
-            style =
-                MaterialTheme.typography.bodyMedium
+                }
         )
 
         Spacer(
@@ -344,9 +278,6 @@ fun GameScreen(
                 Modifier.height(10.dp)
         )
 
-        /*
-         * Current player
-         */
         PlayerTurnCard(
             player = currentPlayer,
             gameMode = gameMode,
@@ -359,9 +290,10 @@ fun GameScreen(
         )
 
         /*
-         * Board
+         * BOARD
          */
         LudoBoard(
+
             players =
                 gameEngine.state.players,
 
@@ -371,12 +303,12 @@ fun GameScreen(
             onTokenClick = { token ->
 
                 /*
-                 * Computer বা animation চললে
-                 * player token touch করতে পারবে না।
+                 * Computer turn হলে
+                 * human touch করতে পারবে না
                  */
                 if (
                     computerTurn ||
-                    isAnimating ||
+                    isRolling ||
                     winner != null
                 ) {
                     return@LudoBoard
@@ -385,22 +317,13 @@ fun GameScreen(
                 /*
                  * Token move
                  */
-                performHumanMove(
-                    engine = gameEngine,
-                    token = token,
+                val result =
+                    gameEngine.moveToken(
+                        token.id
+                    )
 
-                    onStart = {
-                        isAnimating = true
-                    },
-
-                    onEnd = {
-                        isAnimating = false
-                    },
-
-                    onMessage = {
-                        message = it
-                    }
-                )
+                message =
+                    result.message
 
                 diceValue =
                     gameEngine.state.diceValue
@@ -409,8 +332,7 @@ fun GameScreen(
             },
 
             modifier =
-                Modifier
-                    .fillMaxWidth()
+                Modifier.fillMaxWidth()
         )
 
         Spacer(
@@ -419,7 +341,7 @@ fun GameScreen(
         )
 
         /*
-         * Dice
+         * DICE CARD
          */
         Card(
             modifier =
@@ -428,7 +350,7 @@ fun GameScreen(
 
             Column(
                 modifier =
-                    Modifier.padding(8.dp),
+                    Modifier.padding(10.dp),
 
                 horizontalAlignment =
                     Alignment.CenterHorizontally
@@ -439,10 +361,13 @@ fun GameScreen(
                     rolling = isRolling
                 )
 
+                Spacer(
+                    modifier =
+                        Modifier.height(4.dp)
+                )
+
                 Text(
-                    text = message,
-                    style =
-                        MaterialTheme.typography.bodyMedium
+                    text = message
                 )
             }
         }
@@ -453,25 +378,19 @@ fun GameScreen(
         )
 
         /*
-         * Roll button
+         * ROLL DICE
          */
         Button(
+
             enabled =
                 !computerTurn &&
                         !isRolling &&
-                        !isAnimating &&
                         winner == null &&
                         !gameEngine.hasRolledDice(),
 
             onClick = {
 
                 isRolling = true
-
-                /*
-                 * Dice animation-এর জন্য
-                 * UI thread block না করে
-                 * coroutine ব্যবহার করা হবে।
-                 */
             },
 
             modifier =
@@ -484,7 +403,7 @@ fun GameScreen(
         }
 
         /*
-         * Roll animation handling
+         * Human dice roll
          */
         if (
             isRolling &&
@@ -497,24 +416,27 @@ fun GameScreen(
 
                 delay(450)
 
-                val result =
+                val diceResult =
                     gameEngine.rollDiceResult()
 
                 diceValue =
-                    result.value
+                    diceResult.value
 
                 isRolling = false
 
                 refresh++
 
+                /*
+                 * Three consecutive six
+                 */
                 if (
-                    result.thirdSix
+                    diceResult.thirdSix
                 ) {
 
                     message =
                         "🎲 Three 6s! Turn lost."
 
-                    delay(700)
+                    delay(800)
 
                     gameEngine.nextTurn()
 
@@ -525,14 +447,20 @@ fun GameScreen(
 
                     refresh++
 
-                } else if (
+                    return@LaunchedEffect
+                }
+
+                /*
+                 * No movable token
+                 */
+                if (
                     !gameEngine.hasMovableToken()
                 ) {
 
                     message =
                         "No valid move."
 
-                    delay(500)
+                    delay(600)
 
                     gameEngine
                         .finishTurnIfNoMove()
@@ -558,7 +486,7 @@ fun GameScreen(
         )
 
         /*
-         * Bottom buttons
+         * BOTTOM BUTTONS
          */
         Row(
             modifier =
@@ -570,6 +498,7 @@ fun GameScreen(
 
             OutlinedButton(
                 onClick = onNewGame,
+
                 modifier =
                     Modifier.weight(1f)
             ) {
@@ -581,6 +510,7 @@ fun GameScreen(
 
             OutlinedButton(
                 onClick = onBack,
+
                 modifier =
                     Modifier.weight(1f)
             ) {
@@ -593,11 +523,14 @@ fun GameScreen(
     }
 
     /*
-     * Winner Dialog
+     * WINNER
      */
-    if (winner != null) {
+    if (
+        winner != null
+    ) {
 
         WinnerDialog(
+
             winner = winner,
 
             onNewGame = {
@@ -611,92 +544,17 @@ fun GameScreen(
     }
 
     /*
-     * refresh variable ব্যবহার করে
-     * Compose-কে game state পরিবর্তন
-     * সম্পর্কে জানানো হচ্ছে।
+     * Prevent unused state warning
      */
     @Suppress("UNUSED_VARIABLE")
-    val ignored = refresh
+    val stateRefresh = refresh
 }
 
-/*
- * ----------------------------------------------------
- * HUMAN TOKEN MOVE
- * ----------------------------------------------------
- */
-
-private suspend fun performHumanMove(
-    engine: GameEngine,
-    token: Token,
-    onStart: () -> Unit,
-    onEnd: () -> Unit,
-    onMessage: (String) -> Unit
-) {
-
-    onStart()
-
-    animateTokenMove(
-        engine = engine,
-        token = token,
-        onStart = {},
-        onEnd = {}
-    )
-
-    val result =
-        engine.moveToken(
-            token.id
-        )
-
-    onMessage(
-        result.message
-    )
-
-    onEnd()
-}
 
 /*
- * ----------------------------------------------------
- * TOKEN ANIMATION
- * ----------------------------------------------------
- */
-
-private suspend fun animateTokenMove(
-    engine: GameEngine,
-    token: Token,
-    onStart: () -> Unit,
-    onEnd: () -> Unit
-) {
-
-    onStart()
-
-    val path =
-        engine.getMovePath(
-            token.id
-        )
-
-    /*
-     * প্রতিটি cell-এ ছোট delay।
-     *
-     * গুরুত্বপূর্ণ:
-     * GameEngine-এর actual position
-     * animation-এর সময় পরিবর্তন করছি না।
-     *
-     * এটি শুধু timing layer।
-     */
-    for (
-        position in path
-    ) {
-
-        delay(120)
-    }
-
-    onEnd()
-}
-
-/*
- * ----------------------------------------------------
+ * ------------------------------------------
  * PLAYER TURN CARD
- * ----------------------------------------------------
+ * ------------------------------------------
  */
 
 @Composable
@@ -706,24 +564,20 @@ private fun PlayerTurnCard(
     isComputer: Boolean
 ) {
 
-    val text =
-        if (
-            gameMode ==
-            GameMode.VS_COMPUTER
-        ) {
+    val title =
+        when (gameMode) {
 
-            if (isComputer) {
+            GameMode.LOCAL ->
+                "${player.color.name} PLAYER'S TURN"
 
-                "🤖 COMPUTER'S TURN"
+            GameMode.VS_COMPUTER -> {
 
-            } else {
-
-                "👤 YOUR TURN"
+                if (isComputer) {
+                    "🤖 COMPUTER'S TURN"
+                } else {
+                    "👤 YOUR TURN"
+                }
             }
-
-        } else {
-
-            "${player.color.name} PLAYER'S TURN"
         }
 
     Card(
@@ -740,7 +594,8 @@ private fun PlayerTurnCard(
         ) {
 
             Text(
-                text = text,
+                text = title,
+
                 fontWeight =
                     FontWeight.Bold
             )
