@@ -1,6 +1,8 @@
 package com.rana.ludo.ai
 
+import com.rana.ludo.engine.BoardPath
 import com.rana.ludo.engine.GameEngine
+import com.rana.ludo.engine.LudoRules
 import com.rana.ludo.model.Token
 
 object ComputerPlayer {
@@ -16,23 +18,57 @@ object ComputerPlayer {
             return null
         }
 
-        /*
-         * Priority 1:
-         * Finish করার কাছাকাছি token
-         */
-        val finishingToken =
-            movable.maxByOrNull {
-                it.position
-            }
+        // 1. Finish করার সুযোগ
+        movable.firstOrNull { token ->
 
-        if (finishingToken != null) {
-            return finishingToken
+            token.position >= 50 &&
+                    token.position +
+                    engine.state.diceValue >=
+                    LudoRules.LAST_POSITION
+
+        }?.let {
+            return it
         }
 
-        /*
-         * Priority 2:
-         * Random valid token
-         */
-        return movable.randomOrNull()
+        // 2. Home থেকে বের করার সুযোগ
+        movable.firstOrNull { token ->
+            token.isHome &&
+                    engine.state.diceValue == 6
+        }?.let {
+            return it
+        }
+
+        // 3. Safe cell-এ যাওয়ার চেষ্টা
+        movable.firstOrNull { token ->
+
+            val newPosition =
+                LudoRules.calculateNewPosition(
+                    token,
+                    engine.state.diceValue
+                )
+
+            if (newPosition > 51) {
+                false
+            } else {
+
+                val global =
+                    BoardPath.globalPosition(
+                        token.color,
+                        newPosition
+                    )
+
+                BoardPath.isSafeCell(
+                    global
+                )
+            }
+
+        }?.let {
+            return it
+        }
+
+        // 4. সবচেয়ে এগিয়ে থাকা token
+        return movable.maxByOrNull {
+            it.position
+        }
     }
 }
