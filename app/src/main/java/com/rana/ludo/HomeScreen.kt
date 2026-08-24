@@ -1,6 +1,7 @@
 package com.rana.ludo
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,9 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,7 +36,7 @@ fun HomeScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(
+                    colors = listOf(
                         LudoColors.BackgroundDark,
                         LudoColors.Background,
                         LudoColors.BackgroundDark
@@ -52,7 +50,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(
                     horizontal = 24.dp,
-                    vertical = 30.dp
+                    vertical = 24.dp
                 ),
 
             horizontalAlignment =
@@ -63,17 +61,22 @@ fun HomeScreen(
         ) {
 
             /*
-             * Logo
+             * Ludo Logo
              */
             Box(
                 modifier = Modifier
                     .size(125.dp)
                     .shadow(
-                        elevation = 18.dp,
+                        elevation = 16.dp,
                         shape = RoundedCornerShape(32.dp)
                     )
                     .background(
                         color = LudoColors.Panel,
+                        shape = RoundedCornerShape(32.dp)
+                    )
+                    .border(
+                        width = 2.dp,
+                        color = LudoColors.GoldDark,
                         shape = RoundedCornerShape(32.dp)
                     ),
 
@@ -83,44 +86,45 @@ fun HomeScreen(
 
                 Text(
                     text = "🎲",
-                    fontSize = 72.sp
+                    fontSize = 70.sp
                 )
             }
 
             Spacer(
-                modifier =
-                    Modifier.height(24.dp)
+                modifier = Modifier.height(22.dp)
             )
 
+            /*
+             * Title
+             */
             Text(
                 text = "LUDO",
-                fontSize = 42.sp,
+                fontSize = 44.sp,
                 fontWeight = FontWeight.Black,
                 color = LudoColors.Gold
             )
 
             Text(
                 text = "CLASSIC",
-                fontSize = 17.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = LudoColors.TextPrimary,
                 letterSpacing = 5.sp
             )
 
             Spacer(
-                modifier =
-                    Modifier.height(45.dp)
+                modifier = Modifier.height(42.dp)
             )
 
             /*
-             * PLAY
+             * PLAY BUTTON
              */
             Button(
                 onClick = onNewGame,
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(62.dp),
+                    .height(64.dp),
 
                 shape =
                     RoundedCornerShape(20.dp),
@@ -129,63 +133,81 @@ fun HomeScreen(
                     ButtonDefaults.buttonColors(
                         containerColor =
                             LudoColors.Green,
+
                         contentColor =
                             LudoColors.TextPrimary
                     ),
 
                 elevation =
                     ButtonDefaults.buttonElevation(
-                        defaultElevation = 8.dp
+                        defaultElevation = 8.dp,
+                        pressedElevation = 2.dp
                     )
             ) {
 
                 Text(
                     text = "🎮  PLAY",
                     fontSize = 21.sp,
-                    fontWeight =
-                        FontWeight.Black
+                    fontWeight = FontWeight.Black
                 )
             }
 
             Spacer(
-                modifier =
-                    Modifier.height(14.dp)
+                modifier = Modifier.height(14.dp)
             )
 
             /*
-             * EXIT
+             * EXIT BUTTON
+             *
+             * OutlinedButton ব্যবহার করছি না।
+             * তাই OutlinedButtonDefaults-এর কোনো
+             * dependency/import দরকার নেই।
              */
-            OutlinedButton(
+            Button(
                 onClick = onExit,
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(58.dp),
+                    .height(60.dp)
+                    .border(
+                        width = 2.dp,
+                        color = LudoColors.GoldDark,
+                        shape = RoundedCornerShape(20.dp)
+                    ),
 
                 shape =
                     RoundedCornerShape(20.dp),
 
                 colors =
-                    OutlinedButtonDefaults
-                        .colors(
-                            contentColor =
-                                LudoColors.TextPrimary
-                        )
+                    ButtonDefaults.buttonColors(
+                        containerColor =
+                            LudoColors.Panel,
+
+                        contentColor =
+                            LudoColors.TextPrimary
+                    ),
+
+                elevation =
+                    ButtonDefaults.buttonElevation(
+                        defaultElevation = 3.dp,
+                        pressedElevation = 1.dp
+                    )
             ) {
 
                 Text(
                     text = "🚪  EXIT",
                     fontSize = 18.sp,
-                    fontWeight =
-                        FontWeight.Bold
+                    fontWeight = FontWeight.Bold
                 )
             }
 
             Spacer(
-                modifier =
-                    Modifier.height(32.dp)
+                modifier = Modifier.height(30.dp)
             )
 
+            /*
+             * Footer
+             */
             Text(
                 text = "OFFLINE • NO INTERNET REQUIRED",
                 fontSize = 12.sp,
