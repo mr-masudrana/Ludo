@@ -8,5 +8,7 @@ data class GameState(
 
     var diceValue: Int = 0,
 
-    var winner: PlayerColor? = null
+    var winner: PlayerColor? = null,
+
+    var consecutiveSixes: Int = 0
 )
