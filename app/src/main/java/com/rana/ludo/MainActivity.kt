@@ -42,7 +42,7 @@ fun HomeScreen() {
 
         Button(
             onClick = {
-                // পরে Game Screen খুলবে
+                // Game screen পরে এখানে আসবে
             }
         ) {
             Text("New Game")
