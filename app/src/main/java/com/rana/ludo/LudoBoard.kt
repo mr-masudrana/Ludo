@@ -33,7 +33,8 @@ private val HighlightColor = Color(0xFFFFC107)
 fun LudoBoard(
     tokens: List<Token> = emptyList(),
     movableTokenIds: Set<Int> = emptySet(),
-    onTokenClick: (Token) -> Unit = {}
+    onTokenClick: (Token) -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
 
     Canvas(
