@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.rana.ludo.model.AiDifficulty
@@ -19,60 +20,50 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(
         savedInstanceState: Bundle?
     ) {
-        super.onCreate(
-            savedInstanceState
-        )
+        super.onCreate(savedInstanceState)
 
         setContent {
 
             MaterialTheme {
 
                 Surface(
-                    modifier =
-                        Modifier.fillMaxSize(),
-
-                    color =
-                        MaterialTheme
-                            .colorScheme
-                            .background
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme
+                        .colorScheme
+                        .background
                 ) {
 
                     /*
-                     * --------------------------------
-                     * APP SCREEN
-                     * --------------------------------
+                     * App navigation state
                      */
-
-                    var screen by
+                    var screen by remember {
                         mutableStateOf(
                             AppScreen.HOME
                         )
+                    }
 
                     /*
-                     * --------------------------------
-                     * GAME SETTINGS
-                     * --------------------------------
+                     * Game settings
                      */
-
-                    var playerCount by
+                    var playerCount by remember {
                         mutableIntStateOf(4)
+                    }
 
-                    var gameMode by
+                    var gameMode by remember {
                         mutableStateOf(
                             GameMode.LOCAL
                         )
+                    }
 
-                    var aiDifficulty by
+                    var aiDifficulty by remember {
                         mutableStateOf(
                             AiDifficulty.MEDIUM
                         )
+                    }
 
                     /*
-                     * --------------------------------
-                     * NAVIGATION
-                     * --------------------------------
+                     * Navigation
                      */
-
                     when (screen) {
 
                         /*
@@ -81,7 +72,6 @@ class MainActivity : ComponentActivity() {
                         AppScreen.HOME -> {
 
                             HomeScreen(
-
                                 onNewGame = {
 
                                     screen =
@@ -96,7 +86,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         /*
-                         * GAME SETUP
+                         * SETUP
                          */
                         AppScreen.SETUP -> {
 
@@ -173,12 +163,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/*
- * ----------------------------------------
- * APP SCREENS
- * ----------------------------------------
- */
 
+/*
+ * App screens
+ */
 enum class AppScreen {
 
     HOME,
