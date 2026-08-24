@@ -2,31 +2,31 @@ package com.rana.ludo.model
 
 object GameFactory {
 
-    fun createGame(): GameState {
+    fun createGame(
+        playerCount: Int = 4
+    ): GameState {
 
-        val players = mutableListOf<Player>()
+        val colors =
+            PlayerColor.entries
+                .take(playerCount.coerceIn(2, 4))
 
-        PlayerColor.entries.forEach { color ->
+        val players =
+            colors.map { color ->
 
-            val tokens = mutableListOf<Token>()
+                val tokens =
+                    MutableList(4) { index ->
 
-            repeat(4) { index ->
+                        Token(
+                            id = index,
+                            color = color
+                        )
+                    }
 
-                tokens.add(
-                    Token(
-                        id = index,
-                        color = color
-                    )
-                )
-            }
-
-            players.add(
                 Player(
                     color = color,
                     tokens = tokens
                 )
-            )
-        }
+            }.toMutableList()
 
         return GameState(
             players = players
