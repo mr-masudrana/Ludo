@@ -5,4 +5,11 @@ data class Token(
     val color: PlayerColor,
     var position: Int = -1,
     var isFinished: Boolean = false
-)
+) {
+
+    val isHome: Boolean
+        get() = position == -1
+
+    val isOnBoard: Boolean
+        get() = position >= 0 && !isFinished
+}
