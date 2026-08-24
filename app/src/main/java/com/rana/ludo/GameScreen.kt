@@ -1,10 +1,7 @@
 package com.rana.ludo
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -55,21 +51,22 @@ fun GameScreen(
         mutableIntStateOf(0)
     }
 
-    var isRolling by remember {
-        mutableStateOf(false)
-    }
-
     var currentPlayerIndex by remember {
         mutableIntStateOf(0)
     }
 
-    val rotation by animateFloatAsState(
-        targetValue = if (isRolling) 360f else 0f,
-        label = "dice_rotation"
-    )
+    var refresh by remember {
+        mutableIntStateOf(0)
+    }
 
-    val currentColor =
-        gameEngine.state.players[currentPlayerIndex].color
+    val currentPlayer =
+        gameEngine.state.players[currentPlayerIndex]
+
+    val movableTokens =
+        gameEngine.getMovableTokens()
+
+    val movableTokenIds =
+        movableTokens.map { it.id }.toSet()
 
     Column(
         modifier = Modifier
@@ -79,7 +76,7 @@ fun GameScreen(
     ) {
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(8.dp)
         )
 
         Text(
@@ -89,83 +86,125 @@ fun GameScreen(
         )
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(10.dp)
         )
 
         PlayerTurnCard(
-            color = currentColor
+            color = currentPlayer.color
         )
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(10.dp)
         )
 
-        Box(
+        Text(
+            text = if (diceValue == 0) {
+                "Roll the dice"
+            } else {
+                "Dice: $diceValue"
+            },
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        LudoBoard(
+            tokens = currentPlayer.tokens,
+            movableTokenIds = movableTokenIds,
+            onTokenClick = { token ->
+
+                val moved =
+                    gameEngine.moveToken(token.id)
+
+                if (moved) {
+
+                    diceValue =
+                        gameEngine.state.diceValue
+
+                    refresh++
+
+                    /*
+                     * আপাতত move করার পরে turn
+                     * manually End Turn দিয়ে পরিবর্তন হবে।
+                     */
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            LudoBoard()
-        }
+                .aspectRatio(1f)
+        )
 
         Spacer(
             modifier = Modifier.height(10.dp)
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement =
+                Arrangement.Center,
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
 
-            Box(
-                modifier = Modifier
-                    .size(70.dp)
-                    .rotate(rotation)
-                    .background(
-                        color = Color.White,
-                        shape = MaterialTheme.shapes.medium
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-
-                Text(
-                    text = if (diceValue == 0) "🎲" else diceFace(diceValue),
-                    fontSize = 38.sp
-                )
-            }
+            Text(
+                text = if (diceValue == 0) {
+                    "🎲"
+                } else {
+                    diceFace(diceValue)
+                },
+                fontSize = 42.sp
+            )
 
             Spacer(
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.size(12.dp)
             )
 
             Button(
                 onClick = {
 
-                    if (!isRolling) {
+                    val result =
+                        gameEngine.rollDice()
 
-                        isRolling = true
+                    diceValue = result
 
-                        val result = gameEngine.rollDice()
+                    refresh++
 
-                        diceValue = result
-
-                        isRolling = false
-                    }
-                },
-                enabled = !isRolling
+                }
             ) {
                 Text("Roll Dice")
             }
         }
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(8.dp)
+        )
+
+        if (diceValue > 0) {
+
+            Text(
+                text =
+                    if (movableTokens.isEmpty()) {
+                        "No valid move"
+                    } else {
+                        "Tap a highlighted token"
+                    },
+                color =
+                    if (movableTokens.isEmpty()) {
+                        Color.Red
+                    } else {
+                        Color.Unspecified
+                    }
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
         )
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement =
+                Arrangement.spacedBy(8.dp)
         ) {
 
             OutlinedButton(
@@ -177,15 +216,16 @@ fun GameScreen(
                         gameEngine.state.currentPlayerIndex
 
                     diceValue = 0
+
+                    refresh++
+
                 }
             ) {
                 Text("End Turn")
             }
 
             OutlinedButton(
-                onClick = {
-                    onBack()
-                }
+                onClick = onBack
             ) {
                 Text("Exit")
             }
@@ -198,8 +238,6 @@ private fun PlayerTurnCard(
     color: PlayerColor
 ) {
 
-    val playerColor = color.toComposeColor()
-
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -207,23 +245,14 @@ private fun PlayerTurnCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(10.dp),
+
+            horizontalArrangement =
+                Arrangement.Center,
+
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
-
-            Box(
-                modifier = Modifier
-                    .size(18.dp)
-                    .background(
-                        color = playerColor,
-                        shape = MaterialTheme.shapes.small
-                    )
-            )
-
-            Spacer(
-                modifier = Modifier.size(8.dp)
-            )
 
             Text(
                 text = "${color.name} PLAYER'S TURN",
@@ -233,33 +262,19 @@ private fun PlayerTurnCard(
     }
 }
 
-private fun diceFace(value: Int): String {
+private fun diceFace(
+    value: Int
+): String {
 
     return when (value) {
+
         1 -> "⚀"
         2 -> "⚁"
         3 -> "⚂"
         4 -> "⚃"
         5 -> "⚄"
         6 -> "⚅"
+
         else -> "🎲"
-    }
-}
-
-private fun PlayerColor.toComposeColor(): Color {
-
-    return when (this) {
-
-        PlayerColor.GREEN ->
-            Color(0xFF43A047)
-
-        PlayerColor.RED ->
-            Color(0xFFE53935)
-
-        PlayerColor.YELLOW ->
-            Color(0xFFFDD835)
-
-        PlayerColor.BLUE ->
-            Color(0xFF1E88E5)
     }
 }
